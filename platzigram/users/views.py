@@ -4,11 +4,16 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
- 
-from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.db.utils import IntegrityError
+
 #Models
 from users.models import Profile
+from django.contrib.auth.models import User
+
+#Forms
+from users.forms import ProfileForm
+
 
 def login_view(request):
     """ Login view. """
@@ -63,4 +68,45 @@ def signup(request):
     return render(request, 'users/signup.html')
 
 def update_profile(request):
-    return render(request, 'users/update_profile.html')
+    """ Update a user's profile view. """
+    profile = request.user.profile
+    errs = {}
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES)
+        form_1 = ProfileForm(request.POST, request.FILES)
+        #form.is_valid()
+        #Catch the errors first
+        errs = form.errors
+        if form.is_valid():
+            data = form.cleaned_data
+            print("**********\n",form.cleaned_data)
+            profile.biography = data["biography"]
+            profile.website = data["website"]
+            profile.phone_number = data["phone_number"]
+            profile.picture = data["picture"]
+            
+            profile.save()
+            print(f"************\nFORM\n {form}\n****************\nERRORS {errs}")
+            
+            import pdb; pdb.set_trace()
+            return redirect('update_profile')
+        else:
+            print("Esto no es valido:''v")
+            print(f"************\nFORM\n {form}\n****************\nERRORS {errs}")
+            form = ProfileForm()
+            import pdb; pdb.set_trace()
+    else:
+        form = ProfileForm()
+   #     print(f"************\nFORM\n {form}\n****************\nERRORS")
+   # print(f"Errores\n-{form.errors}\n-{errs}")
+   # print("Formulario: ")
+   # print(form )
+   # print(form.fields )
+    
+    return render(request=request, 
+                  template_name='users/update_profile.html',
+                  context={
+                      'profile':profile,
+                      'user':request.user,
+                      'form':form,
+                  })
