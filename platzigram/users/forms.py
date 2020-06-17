@@ -5,11 +5,13 @@ from django import forms
 
 #Models
 from django.contrib.auth.models import User
+from users.models import Profile
 
 class SignupForm(forms.Form):
     
     username = forms.CharField(min_length=4, max_length=50)
     password = forms.CharField(min_length=4, max_length=70, widget=forms.PasswordInput() )
+    password_confirmation = forms.CharField(min_length=4, max_length=70, widget=forms.PasswordInput() )
 
     first_name = forms.CharField(min_length=2, max_length=50)
     last_name = forms.CharField(min_length=2, max_length=50)
@@ -27,6 +29,9 @@ class SignupForm(forms.Form):
     def clean(self):
         """Verify password confirmation match"""
         data = super().clean()
+
+        print(data)
+
         password = data['password']
         password_confirmation = data['password_confirmation']
 

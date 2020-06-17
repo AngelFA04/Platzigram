@@ -44,29 +44,18 @@ def logout_view(request):
 def signup(request):
     """Sign up view."""
     if request.method == 'POST':
-        username = request.POST['username']
-        email = request.POST['email']
-        passwd = request.POST['passwd']
-        passwd_confirmation = request.POST['passwd_confirmation']
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
 
-        if passwd != passwd_confirmation:
-            return render(request, 'users\signup.html', {'error': 'Password confirmation does not match'})
-        try:
-            user = User.objects.create_user(username=username, password=passwd, email=email)
-        except IntegrityError:
-            return render(request, 'users\signup.html', {'error': 'This user already exists'})
-        
-        
-        user.first_name = request.POST['first_name']
-        user.last_name = request.POST['last_name']
-        user.save()
-        profile =  Profile(user=user)
-        profile.save()
+    else:
+        form = SignupForm()
 
-        return redirect('login')
-
-
-    return render(request, 'users/signup.html')
+    return render(
+    request=request, 
+    template_name='users/signup.html',
+    context={'form':form})
 
 
 @login_required
