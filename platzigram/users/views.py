@@ -13,7 +13,7 @@ from users.models import Profile
 from django.contrib.auth.models import User
 
 #Forms
-from users.forms import ProfileForm
+from users.forms import ProfileForm, SignupForm
 
 
 def login_view(request):
