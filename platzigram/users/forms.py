@@ -5,6 +5,16 @@ from django import forms
 
 #
 
+class SignupForm(forms.Form):
+    
+    username = forms.CharField(min_length=4, max_length=50)
+    password = forms.CharField(min_length=4, max_length=70, widget=forms.PasswordInput() )
+
+    first_name = forms.CharField(min_length=2, max_length=50)
+    last_name = forms.CharField(min_length=2, max_length=50)
+
+    email = forms.CharField(min_length=6, max_length=90, widget=forms.EmailInput())
+
 class ProfileForm(forms.Form):
     """Profile form."""
 
