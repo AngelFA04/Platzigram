@@ -1,9 +1,13 @@
 """Users views"""
 #Django
 from django.shortcuts import render,redirect
+from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
+from django.views.generic import ListView
+
 
 #Exception
 from django.db.utils import IntegrityError
@@ -11,10 +15,26 @@ from django.db.utils import IntegrityError
 #Models
 from users.models import Profile
 from django.contrib.auth.models import User
+from posts.models import Post
 
 #Forms
 from users.forms import ProfileForm, SignupForm
 
+from django.views.generic import DetailView
+
+
+
+class UserDetailView(LoginRequiredMixin, DetailView):
+    """ User detail view."""
+    template_name = 'users/detail.html'
+    slug_field = 'username'
+    slug_url_kwarg = 'username'
+    queryset = User.objects.all()
+    context_object_name = 'user'
+
+
+def pvtavida(request, username):
+    return HttpResponse("Matameeeee")
 
 def login_view(request):
     """ Login view. """
@@ -29,7 +49,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request,user)
-            return redirect('feed')
+            return redirect('posts:feed')
         else:
             return render(request, 'users\login.html', {'error': 'Invalid username and password'})
 
@@ -39,7 +59,7 @@ def login_view(request):
 def logout_view(request):        
     logout(request)
     # Redirect to a success page.        
-    return redirect('login')
+    return redirect('users:login')
 
 def signup(request):
     """Sign up view."""
@@ -47,7 +67,7 @@ def signup(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')
+            return redirect('users:login')
 
     else:
         form = SignupForm()
@@ -62,7 +82,6 @@ def signup(request):
 def update_profile(request):
     """ Update a user's profile view. """
     profile = request.user.profile
-    errs = {}
     
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES)
@@ -77,10 +96,9 @@ def update_profile(request):
             profile.picture = data["picture"]
             
             profile.save()
-            print(f"************\nFORM\n {form}\n****************\nERRORS {errs}")
-            
 
-            return redirect('update_profile')
+            url = reverse('users:detail', kwargs={'username': request.user.username})
+            return redirect(url)
 
     else:
         form = ProfileForm()
@@ -93,3 +111,4 @@ def update_profile(request):
                       'user':request.user,
                       'form':form,
                   })
+                
