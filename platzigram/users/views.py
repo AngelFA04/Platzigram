@@ -1,12 +1,12 @@
 """Users views"""
 #Django
 from django.shortcuts import render,redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.views.generic import ListView
+from django.views.generic import ListView, FormView
 
 
 #Exception
@@ -20,7 +20,8 @@ from posts.models import Post
 #Forms
 from users.forms import ProfileForm, SignupForm
 
-from django.views.generic import DetailView
+#Generic class views
+from django.views.generic import DetailView, UpdateView
 
 
 
@@ -39,8 +40,32 @@ class UserDetailView(LoginRequiredMixin, DetailView):
         context['posts'] = Post.objects.filter(user=user).order_by('-created')
         return context
 
-def pvtavida(request, username):
-    return HttpResponse("Matameeeee")
+class SignupView(FormView):
+    template_name = 'users/signup.html'
+    form_class = SignupForm
+    success_url = reverse_lazy('users:login')
+
+    def form_valid(self, form):
+        """ Save from data """
+        form.save()
+        return super().form_valid(form)
+
+class UpdateProfileView(LoginRequiredMixin, UpdateView):
+    """ Update profile view """
+
+    template_name = 'users/update_profile.html'
+    model = Profile
+    fields = ['website', 'biography', 'phone_number', 'picture']
+    
+
+    def get_object(self):
+        """" Return user's profile """
+        return self.request.user.profile
+    
+    def get_success_url(self):
+        """ Return to user's profile """
+        username = self.object.user.username 
+        return reverse('users:detail', kwargs={'username': username})
 
 def login_view(request):
     """ Login view. """
@@ -67,6 +92,9 @@ def logout_view(request):
     # Redirect to a success page.        
     return redirect('users:login')
 
+
+#These functions are not longer used. But for didactic purposes they aren't erased.
+
 def signup(request):
     """Sign up view."""
     if request.method == 'POST':
@@ -82,6 +110,8 @@ def signup(request):
     request=request, 
     template_name='users/signup.html',
     context={'form':form})
+
+
 
 
 @login_required
