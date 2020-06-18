@@ -11,11 +11,11 @@ urlpatterns = [
     #Managment
     path(
         route='login/', 
-        view=views.login_view, 
+        view=views.LoginView.as_view(), 
         name='login'),
     path(
         route='logout/', 
-        view=views.logout_view, 
+        view=views.LogoutView.as_view(), 
         name='logout'),
     path(
         route='signup/', 
@@ -26,9 +26,7 @@ urlpatterns = [
         view=views.UpdateProfileView.as_view(), 
         name='update_profile'),
     
-    
     #Posts
-    
     path(
         route='profile/<str:username>/',
         view=views.UserDetailView.as_view(),
